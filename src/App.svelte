@@ -176,7 +176,7 @@
                   for="character-pity"
                   class="text-muted-foreground text-xs font-medium"
                 >
-                  Pity counter (pulls)
+                  Pity counter
                 </Label>
                 <Input
                   id="character-pity"
@@ -187,10 +187,6 @@
                   bind:value={characterPity}
                   class="bg-input border-border h-8 text-sm"
                 />
-                <p class="text-xs invisible" aria-hidden="true">
-                  1 box = 10 Tri-Keys = 10 Arcs. Featured guaranteed at the 8th
-                  box.
-                </p>
               </div>
             {:else}
               <div class="space-y-1">
@@ -220,7 +216,7 @@
                   for="arc-pity"
                   class="text-muted-foreground text-xs font-medium"
                 >
-                  Pity counter (boxes)
+                  Pity counter
                 </Label>
                 <Input
                   id="arc-pity"
@@ -231,10 +227,6 @@
                   bind:value={arcPity}
                   class="bg-input border-border h-8 text-sm"
                 />
-                <p class="text-muted-foreground text-xs">
-                  1 box = 10 Tri-Keys = 10 Arcs. Featured guaranteed at the 8th
-                  box.
-                </p>
               </div>
             {/if}
           </div>
