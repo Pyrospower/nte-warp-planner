@@ -4,6 +4,7 @@ import {
   characterSuccessChance,
   arcSuccessChance,
 } from "$lib/warp-engine";
+import { asset } from "$lib/utils";
 
 export const awakenings = ["A0", "A1", "A2", "A3", "A4", "A5", "A6"] as const;
 export const mixings = ["T1", "T2", "T3", "T4", "T5"] as const;
@@ -56,7 +57,7 @@ class PlannerState {
   goalLabel = $derived(this.isCharacter ? this.targetAwakening : this.targetMixing);
   unit = $derived(this.isCharacter ? "pulls" : "boxes");
   budgetIcon = $derived(
-    this.isCharacter ? "/assets/solid_dice.webp" : "/assets/tri-key.webp",
+    asset(this.isCharacter ? "solid_dice.webp" : "tri-key.webp"),
   );
   bannerName = $derived(this.isCharacter ? "Character Banner" : "Arc Banner");
   avgHeader = $derived(this.isCharacter ? "Avg. pulls" : "Avg. boxes");
