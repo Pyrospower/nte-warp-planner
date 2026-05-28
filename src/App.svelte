@@ -10,6 +10,7 @@
     characterSuccessChance,
     arcSuccessChance,
   } from "$lib/warp-engine";
+  import { ModeWatcher } from "mode-watcher";
 
   const awakenings = ["A0", "A1", "A2", "A3", "A4", "A5", "A6"] as const;
   const mixings = ["T1", "T2", "T3", "T4", "T5"] as const;
@@ -79,6 +80,7 @@
   const barWidth = $derived(`${Math.max(result.successChance * 100, 2)}%`);
 </script>
 
+<ModeWatcher />
 <main class="bg-background text-primary min-h-screen py-8 space-y-4">
   <section class="w-full max-w-5xl mx-auto px-4">
     <h1 class="text-2xl sm:text-3xl font-bold text-center">Warp Planner</h1>
