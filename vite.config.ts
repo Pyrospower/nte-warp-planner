@@ -5,6 +5,7 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/nte-warp-planner/",
   plugins: [svelte(), tailwindcss()],
   resolve: {
     alias: {
