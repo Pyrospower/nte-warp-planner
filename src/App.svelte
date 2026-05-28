@@ -233,5 +233,29 @@
         </div>
       </div>
     </Card>
+
+    <div class="flex items-center justify-center">
+      {annulith}
+      <img src="/assets/annulith.webp" alt="Annulith" class="w-5 h-5 mx-1" />
+      <span>+&nbsp;</span>
+      {solidDice}
+      <img
+        src="/assets/solid_dice.webp"
+        alt="Solid Dice"
+        class="w-5 h-5 mx-1"
+      /> <span>+&nbsp;</span>
+      {warpPieces}
+      <img
+        src="/assets/warp_piece.webp"
+        alt="Warp Piece"
+        class="w-5 h-5 mx-1"
+      />
+      = {0}
+      <img
+        src="/assets/solid_dice.webp"
+        alt="Solid Dice"
+        class="w-5 h-5 mx-1"
+      />
+    </div>
   </section>
 </main>
