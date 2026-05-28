@@ -4,6 +4,12 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import * as Tabs from "$lib/components/ui/tabs/index.js";
   import * as Select from "$lib/components/ui/select/index.js";
+  import {
+    characterDiceBudget,
+    arcBoxBudget,
+    characterSuccessChance,
+    arcSuccessChance,
+  } from "$lib/warp-engine";
 
   const awakenings = ["A0", "A1", "A2", "A3", "A4", "A5", "A6"] as const;
   const mixings = ["T1", "T2", "T3", "T4", "T5"] as const;
@@ -18,6 +24,59 @@
   let targetMixing = $state<(typeof mixings)[number]>("T1");
   let characterPity = $state(0);
   let arcPity = $state(0);
+
+  const safe = $derived({
+    annulith: Math.max(0, annulith || 0),
+    solidDice: Math.max(0, solidDice || 0),
+    triKeys: Math.max(0, triKeys || 0),
+    warpPieces: Math.max(0, warpPieces || 0),
+  });
+
+  const budget = $derived(
+    banner === "character"
+      ? characterDiceBudget(safe.annulith, safe.solidDice, safe.warpPieces)
+      : arcBoxBudget(safe.annulith, safe.triKeys, safe.warpPieces),
+  );
+
+  const result = $derived.by(() => {
+    if (banner === "character") {
+      const pity = Math.min(89, Math.max(0, characterPity || 0));
+      return characterSuccessChance(
+        budget,
+        pity,
+        awakenings.indexOf(targetAwakening),
+      );
+    }
+    const pity = Math.min(7, Math.max(0, arcPity || 0));
+    return arcSuccessChance(budget, pity, mixings.indexOf(targetMixing) + 1);
+  });
+
+  const isCharacter = $derived(banner === "character");
+  const goalLabel = $derived(isCharacter ? targetAwakening : targetMixing);
+  const unit = $derived(isCharacter ? "pulls" : "boxes");
+  const budgetIcon = $derived(
+    isCharacter ? "/assets/solid_dice.webp" : "/assets/tri-key.webp",
+  );
+  const bannerName = $derived(isCharacter ? "Character Banner" : "Arc Banner");
+  const avgHeader = $derived(isCharacter ? "Avg. pulls" : "Avg. boxes");
+  const avgValue = $derived(
+    isCharacter ? result.average.toFixed(1) : result.average.toFixed(2),
+  );
+
+  const pct = $derived(result.successChance * 100);
+  const pctText = $derived(
+    pct >= 99.95 ? "100.0%" : pct < 0.05 ? "0.0%" : pct.toFixed(1) + "%",
+  );
+
+  function successColor(chance: number): string {
+    if (chance >= 0.9) return "bg-emerald-500";
+    if (chance >= 0.7) return "bg-green-500";
+    if (chance >= 0.5) return "bg-yellow-500";
+    if (chance >= 0.3) return "bg-orange-500";
+    if (chance >= 0.1) return "bg-orange-600";
+    return "bg-red-500";
+  }
+  const barWidth = $derived(`${Math.max(result.successChance * 100, 2)}%`);
 </script>
 
 <main class="bg-background text-primary min-h-screen py-8 space-y-4">
@@ -234,28 +293,74 @@
       </div>
     </Card>
 
-    <div class="flex items-center justify-center">
-      {annulith}
-      <img src="/assets/annulith.webp" alt="Annulith" class="w-5 h-5 mx-1" />
-      <span>+&nbsp;</span>
-      {solidDice}
-      <img
-        src="/assets/solid_dice.webp"
-        alt="Solid Dice"
-        class="w-5 h-5 mx-1"
-      /> <span>+&nbsp;</span>
-      {warpPieces}
-      <img
-        src="/assets/warp_piece.webp"
-        alt="Warp Piece"
-        class="w-5 h-5 mx-1"
-      />
-      = {0}
-      <img
-        src="/assets/solid_dice.webp"
-        alt="Solid Dice"
-        class="w-5 h-5 mx-1"
-      />
+    <div
+      class="mt-4 flex flex-wrap items-center justify-center gap-1 text-sm text-muted-foreground"
+    >
+      <span class="font-semibold text-foreground">{safe.annulith}</span>
+      <img src="/assets/annulith.webp" alt="Annulith" class="w-5 h-5" />
+      <span>+</span>
+      {#if isCharacter}
+        <span class="font-semibold text-foreground">{safe.solidDice}</span>
+        <img src="/assets/solid_dice.webp" alt="Solid Dice" class="w-5 h-5" />
+      {:else}
+        <span class="font-semibold text-foreground">{safe.triKeys}</span>
+        <img src="/assets/tri-key.webp" alt="Tri-Key" class="w-5 h-5" />
+      {/if}
+      <span>+</span>
+      <span class="font-semibold text-foreground">{safe.warpPieces}</span>
+      <img src="/assets/warp_piece.webp" alt="Warp Piece" class="w-5 h-5" />
+      <span>=</span>
+      <span class="font-semibold text-primary">{budget}</span>
+      <span>{unit}</span>
     </div>
+
+    <Card class="mt-4 p-0 bg-card border-border overflow-hidden">
+      <div class="p-3 bg-secondary/50 border-b border-border">
+        <div class="flex items-center justify-between text-sm">
+          <span class="font-medium text-foreground flex items-center gap-2">
+            <img src={budgetIcon} alt="" class="w-5 h-5" />
+            {bannerName}
+          </span>
+          <span class="text-muted-foreground">{budget} {unit}</span>
+        </div>
+      </div>
+
+      <div
+        class="grid grid-cols-[60px_1fr_80px] gap-2 px-3 py-2 bg-secondary/30 text-xs font-medium text-muted-foreground"
+      >
+        <div class="text-center">Goal</div>
+        <div class="text-center">Success chance</div>
+        <div class="text-center">{avgHeader}</div>
+      </div>
+
+      <div
+        class="grid grid-cols-[60px_1fr_80px] gap-2 px-3 py-2 items-center text-sm"
+      >
+        <div class="flex justify-center">
+          <span
+            class="px-2 py-0.5 rounded bg-secondary text-foreground font-medium text-xs"
+          >
+            {goalLabel}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex-1 h-5 bg-secondary rounded overflow-hidden">
+            <div
+              class="h-full {successColor(
+                result.successChance,
+              )} transition-all duration-300"
+              style="width: {barWidth}"
+            ></div>
+          </div>
+          <span class="text-foreground font-medium w-12 text-right text-xs">
+            {pctText}
+          </span>
+        </div>
+        <div class="flex items-center justify-center gap-1 text-xs">
+          <span class="text-foreground">{avgValue}</span>
+          <img src={budgetIcon} alt="" class="w-3.5 h-3.5" />
+        </div>
+      </div>
+    </Card>
   </section>
 </main>
